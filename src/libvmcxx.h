@@ -52,14 +52,6 @@ class Process;
   Some helper macros
 *******************************************************************************/
 
-#define SHAREMIND_LIBVM_CXX_EXCEPT_OVERRIDES_TEST(capture,error) \
-    ([capture]{ \
-        const VmError e = (error); \
-        if (e == ::SHAREMIND_VM_OUT_OF_MEMORY) \
-            throw std::bad_alloc(); \
-        return e; \
-    }())
-
 #define SHAREMIND_LIBVM_CXX_DEFINE_PARENT_GETTER(ClassName,Parent,parent) \
     inline Parent * parent() const noexcept { \
         return Detail::libvm::mustTag( \
@@ -76,8 +68,7 @@ class Process;
     public: /* Methods: */ \
         inline Exception(const ::Sharemind ## ClassName & c) \
             : VmExceptionBase( \
-                      SHAREMIND_LIBVM_CXX_EXCEPT_OVERRIDES_TEST( \
-                              &c, \
+                      Detail::libvm::allocThrow( \
                               ::Sharemind ## ClassName ## _lastError(&c)), \
                       ::Sharemind ## ClassName ## _lastErrorString(&c)) \
         {} \
@@ -102,6 +93,12 @@ class Process;
 
 namespace Detail {
 namespace libvm {
+
+inline VmError allocThrow(const VmError e) {
+    if (e == ::SHAREMIND_VM_OUT_OF_MEMORY)
+        throw std::bad_alloc();
+    return e;
+}
 
 template <typename CType> struct TypeInv;
 
@@ -572,9 +569,7 @@ private: /* Methods: */
                     ::SharemindVm_new(context, &error, &errorStr);
             if (vm)
                 return vm;
-            throw Exception(
-                    SHAREMIND_LIBVM_CXX_EXCEPT_OVERRIDES_TEST(=,error),
-                    errorStr);
+            throw Exception(Detail::libvm::allocThrow(error), errorStr);
         }())
     {
         ::SharemindVm_setTagWithDestructor(
@@ -655,7 +650,6 @@ inline Process::Process(Program & program)
 #undef SHAREMIND_LIBVM_CXX_DEFINE_EXCEPTION
 #undef SHAREMIND_LIBVM_CXX_DEFINE_CPTR_GETTERS
 #undef SHAREMIND_LIBVM_CXX_DEFINE_PARENT_GETTER
-#undef SHAREMIND_LIBVM_CXX_EXCEPT_OVERRIDES_TEST
 
 
 } /* namespace sharemind { */
