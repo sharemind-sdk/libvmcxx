@@ -14,6 +14,7 @@
 #include <exception>
 #include <new>
 #include <sharemind/compiler-support/GccPR54526.h>
+#include <sharemind/compiler-support/GccPR55015.h>
 #include <sharemind/FunctionTraits.h>
 #include <sharemind/VoidT.h>
 #include <type_traits>
@@ -570,14 +571,24 @@ private: /* Methods: */
             throw Exception(Detail::libvm::allocThrow(error), errorStr);
         }())
     {
+        #define SHAREMIND_LIBVM_CXX_VM_L1 \
+            (void * m) noexcept { \
+                Vm * const vm = static_cast<Vm *>(m); \
+                vm->m_c = nullptr; \
+                delete vm; \
+            }
+        #if SHAREMIND_GCCPR55015
+        struct F { static void f SHAREMIND_LIBVM_CXX_VM_L1 };
+        #endif
         ::SharemindVm_setTagWithDestructor(
                     m_c,
                     this,
-                    [](void * m) noexcept {
-                        Vm * const vm = static_cast<Vm *>(m);
-                        vm->m_c = nullptr;
-                        delete vm;
-                    });
+                    #if SHAREMIND_GCCPR55015
+                    &F::f
+                    #else
+                    []SHAREMIND_LIBVM_CXX_VM_L1
+                    #endif
+                    );
     }
 
     inline ::SharemindProgram & newProgram(Program::Overrides * const overrides) {
@@ -602,15 +613,25 @@ private: /* Fields: */
 inline Program::Program(Vm & vm, Overrides * const overrides)
     : m_c(&vm.newProgram(overrides))
 {
+    #define SHAREMIND_LIBVM_CXX_PROGRAM_L1 \
+        (void * program) noexcept { \
+            Program * const p = static_cast<Program *>(program); \
+            p->m_c = nullptr; \
+            delete p; \
+        }
+    #if SHAREMIND_GCCPR55015
+    struct F { static void f SHAREMIND_LIBVM_CXX_PROGRAM_L1 };
+    #endif
     try {
         ::SharemindProgram_setTagWithDestructor(
                     m_c,
                     this,
-                    [](void * program) noexcept {
-                        Program * const p = static_cast<Program *>(program);
-                        p->m_c = nullptr;
-                        delete p;
-                    });
+                    #if SHAREMIND_GCCPR55015
+                    &F::f
+                    #else
+                    []SHAREMIND_LIBVM_CXX_PROGRAM_L1
+                    #endif
+                    );
     } catch (...) {
         ::SharemindProgram_free(m_c);
         throw;
@@ -625,15 +646,25 @@ inline Program::Program(Vm & vm, Overrides * const overrides)
 inline Process::Process(Program & program)
     : m_c(&program.newProcess())
 {
+    #define SHAREMIND_LIBVM_CXX_PROCESS_L1 \
+        (void * process) noexcept { \
+            Process * const p = static_cast<Process *>(process); \
+            p->m_c = nullptr; \
+            delete p; \
+        }
+    #if SHAREMIND_GCCPR55015
+    struct F { static void f SHAREMIND_LIBVM_CXX_PROCESS_L1 };
+    #endif
     try {
         ::SharemindProcess_setTagWithDestructor(
                     m_c,
                     this,
-                    [](void * process) noexcept {
-                        Process * const p = static_cast<Process *>(process);
-                        p->m_c = nullptr;
-                        delete p;
-                    });
+                    #if SHAREMIND_GCCPR55015
+                    &F::f
+                    #else
+                    []SHAREMIND_LIBVM_CXX_PROCESS_L1
+                    #endif
+                    );
     } catch (...) {
         ::SharemindProcess_free(m_c);
         throw;
