@@ -21,7 +21,7 @@ FIND_PACKAGE(SharemindLibvm 0.3.0 REQUIRED)
 
 SET(LIBVMCXX_INSTALL_DEFINITIONS ${SharemindCxxHeaders_DEFINITIONS}
                                  ${SharemindLibvm_DEFINITIONS})
-SET(LIBVMCXX_INSTALL_LINK_LIBRARIES ${SharemindCxxHeaders_DEFINITIONS}
+SET(LIBVMCXX_INSTALL_LINK_LIBRARIES ${SharemindCxxHeaders_LIBRARIES}
                                     ${SharemindLibvm_LIBRARIES})
 SET(LIBVMCXX_INSTALL_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include"
                                   ${SharemindCxxHeaders_INCLUDE_DIRS}
