@@ -13,7 +13,6 @@
 #include <cassert>
 #include <exception>
 #include <new>
-#include <sharemind/compiler-support/GccVersion.h>
 #include <sharemind/FunctionTraits.h>
 #include <sharemind/VoidT.h>
 #include <type_traits>
