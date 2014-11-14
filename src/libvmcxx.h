@@ -193,14 +193,14 @@ struct CustomContext1<F, 1u>: VmContext {
 
     template <typename F_>
     inline CustomContext1(F_ && f)
-        : VmContext{[](VmContext * c) noexcept {
+        : VmContext{new Inner{std::forward<F_>(f)},
+                    [](VmContext * c) noexcept {
                         delete static_cast<Inner *>(c->internal);
                         delete static_cast<CustomContext1<F> *>(c);
                     },
                     [](VmContext * c, const char * name) noexcept
                     { return static_cast<Inner *>(c->internal)->f(name); },
-                    nullptr,
-                    new Inner{std::forward<F_>(f)}}
+                    nullptr}
     {}
 };
 
@@ -215,14 +215,14 @@ struct CustomContext1<F, 2u>: VmContext {
 
     template <typename F_>
     inline CustomContext1(F_ && f)
-        : VmContext{[](VmContext * c) noexcept {
+        : VmContext{new Inner{std::forward<F_>(f)},
+                    [](VmContext * c) noexcept {
                         delete static_cast<Inner *>(c->internal);
                         delete static_cast<CustomContext1<F> *>(c);
                     },
                     nullptr,
                     [](VmContext * c, const char * name) noexcept
-                    { return static_cast<Inner *>(c->internal)->f(name); },
-                    new Inner{std::forward<F_>(f)}}
+                    { return static_cast<Inner *>(c->internal)->f(name); }}
     {}
 };
 
@@ -240,7 +240,9 @@ struct CustomContext2: VmContext {
 
     template <typename FindSyscall_, typename FindPd_>
     inline CustomContext2(FindSyscall_ && findSyscall, FindPd_ && findPd)
-        : VmContext{[](VmContext * c) noexcept {
+        : VmContext{new Inner{std::forward<FindSyscall_>(findSyscall),
+                              std::forward<FindPd_>(findPd)},
+                    [](VmContext * c) noexcept {
                         delete static_cast<Inner *>(c->internal);
                         delete static_cast<CustomContext2<FindSyscall,
                                                           FindPd> *>(c);
@@ -250,9 +252,7 @@ struct CustomContext2: VmContext {
                                       n);
                     },
                     [](VmContext * c, const char * n)
-                    { return static_cast<Inner *>(c->internal)->findPd(n); },
-                    new Inner{std::forward<FindSyscall_>(findSyscall),
-                              std::forward<FindPd_>(findPd)}}
+                    { return static_cast<Inner *>(c->internal)->findPd(n); }}
     {}
 
 };
