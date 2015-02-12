@@ -255,7 +255,7 @@ public: /* Methods: */
 };
 
 template <typename FindPd>
-struct CustomContext1<FindPd, 2u>: CustomContextBase {
+class CustomContext1<FindPd, 2u>: public CustomContextBase {
 
 private: /* Types: */
 
