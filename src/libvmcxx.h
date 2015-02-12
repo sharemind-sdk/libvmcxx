@@ -190,87 +190,113 @@ template <typename F,
                       std::integral_constant<unsigned, 0u>::type
                   >::type
               >::type::value>
-struct CustomContext1;
+class CustomContext1;
+template <typename FindSyscall, typename FindPd> class CustomContext2;
 
-template <typename F>
-struct CustomContext1<F, 1u>: VmContext {
+class CustomContextBase: public VmContext {
 
-    /* Types: */
+    template <typename, unsigned> friend class CustomContext1;
+    template <typename, typename> friend class CustomContext2;
 
-    struct Inner { F f; };
+protected: /* Methods: */
 
-    /* Methods: */
-
-    template <typename F_>
-    inline CustomContext1(F_ && f)
-        : VmContext{new Inner{std::forward<F_>(f)},
-                    [](VmContext * c) noexcept {
-                        delete static_cast<Inner *>(c->internal);
-                        delete static_cast<CustomContext1<F> *>(c);
-                    },
-                    [](VmContext * c, const char * name) noexcept
-                    { return static_cast<Inner *>(c->internal)->f(name); },
-                    nullptr}
+    template <typename InnerPtr,
+              typename Destructor,
+              typename FindSyscall,
+              typename FindPd>
+    CustomContextBase(InnerPtr && innerPtr,
+                      Destructor && destructor,
+                      FindSyscall && findSyscall,
+                      FindPd && findPd)
+        : VmContext{std::forward<InnerPtr>(innerPtr),
+                    std::forward<Destructor>(destructor),
+                    std::forward<FindSyscall>(findSyscall),
+                    std::forward<FindPd>(findPd)}
     {}
+
+private: /* Methods: */
+
+    template <typename Inner, typename Subclass>
+    static void staticDestructor(VmContext * c) noexcept {
+        delete static_cast<Inner *>(c->internal);
+        delete static_cast<Subclass *>(c);
+    }
+
+    template <typename Inner>
+    static SharemindSyscallWrapper staticFindSyscall(VmContext * c,
+                                                     const char * name) noexcept
+    { return static_cast<Inner *>(c->internal)->findSyscall(name); }
+
+    template <typename Inner>
+    static SharemindPd * staticFindPd(VmContext * c, const char * name) noexcept
+    { return static_cast<Inner *>(c->internal)->findPd(name); }
+
 };
 
-template <typename F>
-struct CustomContext1<F, 2u>: VmContext {
+template <typename FindSyscall>
+class CustomContext1<FindSyscall, 1u>: public CustomContextBase {
 
-    /* Types: */
+private: /* Types: */
 
-    struct Inner { F f; };
+    struct Inner { FindSyscall findSyscall; };
 
-    /* Methods: */
+public: /* Methods: */
 
-    template <typename F_>
-    inline CustomContext1(F_ && f)
-        : VmContext{new Inner{std::forward<F_>(f)},
-                    [](VmContext * c) noexcept {
-                        delete static_cast<Inner *>(c->internal);
-                        delete static_cast<CustomContext1<F> *>(c);
-                    },
-                    nullptr,
-                    [](VmContext * c, const char * name) noexcept
-                    { return static_cast<Inner *>(c->internal)->f(name); }}
+    template <typename FindSyscall_>
+    inline CustomContext1(FindSyscall_ && f)
+        : CustomContextBase{new Inner{std::forward<FindSyscall_>(f)},
+                            &CustomContextBase::staticDestructor<
+                                Inner,
+                                CustomContext1<FindSyscall, 1u> >,
+                            &CustomContextBase::staticFindSyscall<Inner>,
+                            nullptr}
     {}
+
+};
+
+template <typename FindPd>
+struct CustomContext1<FindPd, 2u>: CustomContextBase {
+
+private: /* Types: */
+
+    struct Inner { FindPd findPd; };
+
+public: /* Methods: */
+
+    template <typename FindPd_>
+    inline CustomContext1(FindPd_ && f)
+        : CustomContextBase{new Inner{std::forward<FindPd_>(f)},
+                            &CustomContextBase::staticDestructor<
+                                Inner,
+                                CustomContext1<FindPd, 2u> >,
+                            nullptr,
+                            &CustomContextBase::staticFindPd<Inner>}
+    {}
+
 };
 
 template <typename FindSyscall, typename FindPd>
-struct CustomContext2: VmContext {
+class CustomContext2: public CustomContextBase {
 
-/* Types: */
+private: /* Types: */
 
     struct Inner {
         FindSyscall findSyscall;
         FindPd findPd;
     };
 
-/* Methods: */
+public: /* Methods: */
 
     template <typename FindSyscall_, typename FindPd_>
     inline CustomContext2(FindSyscall_ && findSyscall, FindPd_ && findPd)
-        : VmContext{new Inner{std::forward<FindSyscall_>(findSyscall),
-                              std::forward<FindPd_>(findPd)},
-                    &staticDestructor,
-                    &staticFindSyscall,
-                    &staticFindPd}
+        : CustomContextBase{new Inner{std::forward<FindSyscall_>(findSyscall),
+                                      std::forward<FindPd_>(findPd)},
+                            &CustomContextBase::staticDestructor<
+                                Inner,
+                                CustomContext2<FindSyscall, FindPd> >,
+                            &CustomContextBase::staticFindSyscall<Inner>,
+                            &CustomContextBase::staticFindPd<Inner>}
     {}
-
-private: /* Methods: */
-
-    static void staticDestructor(VmContext * c) noexcept {
-        delete static_cast<Inner *>(c->internal);
-        delete static_cast<CustomContext2<FindSyscall,
-                                          FindPd> *>(c);
-    }
-
-    static SharemindSyscallWrapper staticFindSyscall(VmContext * c,
-                                                     const char * n)
-    { return static_cast<Inner *>(c->internal)->findSyscall(n); }
-
-    static SharemindPd * staticFindPd(VmContext * c, const char * n)
-    { return static_cast<Inner *>(c->internal)->findPd(n); }
 
 };
 
