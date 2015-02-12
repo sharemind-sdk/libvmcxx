@@ -252,18 +252,25 @@ struct CustomContext2: VmContext {
     inline CustomContext2(FindSyscall_ && findSyscall, FindPd_ && findPd)
         : VmContext{new Inner{std::forward<FindSyscall_>(findSyscall),
                               std::forward<FindPd_>(findPd)},
-                    [](VmContext * c) noexcept {
-                        delete static_cast<Inner *>(c->internal);
-                        delete static_cast<CustomContext2<FindSyscall,
-                                                          FindPd> *>(c);
-                    },
-                    [](VmContext * c, const char * n) {
-                        return static_cast<Inner *>(c->internal)->findSyscall(
-                                      n);
-                    },
-                    [](VmContext * c, const char * n)
-                    { return static_cast<Inner *>(c->internal)->findPd(n); }}
+                    &staticDestructor,
+                    &staticFindSyscall,
+                    &staticFindPd}
     {}
+
+private: /* Methods: */
+
+    static void staticDestructor(VmContext * c) noexcept {
+        delete static_cast<Inner *>(c->internal);
+        delete static_cast<CustomContext2<FindSyscall,
+                                          FindPd> *>(c);
+    }
+
+    static SharemindSyscallWrapper staticFindSyscall(VmContext * c,
+                                                     const char * n)
+    { return static_cast<Inner *>(c->internal)->findSyscall(n); }
+
+    static SharemindPd * staticFindPd(VmContext * c, const char * n)
+    { return static_cast<Inner *>(c->internal)->findPd(n); }
 
 };
 
