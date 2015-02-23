@@ -405,11 +405,7 @@ public: /* Methods: */
 
     void continueRun() { run__<&::SharemindProcess_continue>(); }
 
-    void pause() {
-        const VmError r = ::SharemindProcess_pause(m_c);
-        if (r != ::SHAREMIND_VM_OK)
-            throw Exception(r, *m_c);
-    }
+    void pause() { ::SharemindProcess_pause(m_c); }
 
     int64_t returnValue() const noexcept
     { return ::SharemindProcess_returnValue(m_c); }
