@@ -407,6 +407,12 @@ public: /* Methods: */
 
     void pause() { ::SharemindProcess_pause(m_c); }
 
+    template <typename SyscallExceptionType>
+    SyscallExceptionType const & syscallException() const noexcept {
+        using T = SyscallExceptionType const;
+        return *static_cast<T *>(::SharemindProcess_syscallException(m_c));
+    }
+
     int64_t returnValue() const noexcept
     { return ::SharemindProcess_returnValue(m_c); }
 
