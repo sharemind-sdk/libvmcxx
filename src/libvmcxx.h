@@ -537,6 +537,12 @@ public: /* Methods: */
                                               instructionIndex);
     }
 
+    size_t pdCount() const noexcept
+    { return ::SharemindProgram_pdCount(m_c); }
+
+    ::SharemindPd * pd(size_t const pdIndex) const noexcept
+    { return ::SharemindProgram_pd(m_c, pdIndex); }
+
 private: /* Methods: */
 
     inline Program(Vm & vm, Overrides * const overrides);
