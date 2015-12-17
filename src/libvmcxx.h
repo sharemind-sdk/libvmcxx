@@ -47,7 +47,7 @@ using VmInstruction = ::SharemindVmInstruction;
 *******************************************************************************/
 
 using VmError = ::SharemindVmError;
-inline const char * VmError_toString(const VmError e) noexcept
+inline char const * VmError_toString(VmError const e) noexcept
 { return ::SharemindVmError_toString(e); }
 
 
@@ -72,28 +72,28 @@ class Process;
 
 #define SHAREMIND_LIBVM_CXX_DEFINE_CPTR_GETTERS(ClassName) \
     inline ::Sharemind ## ClassName * cPtr() noexcept { return m_c; } \
-    inline const ::Sharemind ## ClassName * cPtr() const noexcept \
+    inline ::Sharemind ## ClassName const * cPtr() const noexcept \
     { return m_c; }
 
 #define SHAREMIND_LIBVM_CXX_DEFINE_EXCEPTION(ClassName) \
     class Exception: public VmExceptionBase { \
     public: /* Methods: */ \
-        inline Exception(const ::Sharemind ## ClassName & c) \
+        inline Exception(::Sharemind ## ClassName const & c) \
             : VmExceptionBase( \
                       Detail::libvm::allocThrow( \
                               ::Sharemind ## ClassName ## _lastError(&c)), \
                       ::Sharemind ## ClassName ## _lastErrorString(&c)) \
         {} \
-        inline Exception(const ClassName & c) : Exception(*(c.cPtr())) {} \
-        inline Exception(const VmError error, const char * const errorStr) \
+        inline Exception(ClassName const & c) : Exception(*(c.cPtr())) {} \
+        inline Exception(VmError const error, char const * const errorStr) \
             : VmExceptionBase(error, errorStr) \
         {} \
-        inline Exception(const VmError error, \
-                         const ::Sharemind ## ClassName & c) \
+        inline Exception(VmError const error, \
+                         ::Sharemind ## ClassName const & c) \
             : VmExceptionBase(error, \
                               ::Sharemind ## ClassName ## _lastErrorString(&c))\
         {} \
-        inline Exception(const VmError error, const ClassName & c) \
+        inline Exception(VmError const error, ClassName const & c) \
             : Exception(error, *(c.cPtr())) \
         {} \
     }
@@ -106,7 +106,7 @@ class Process;
 namespace Detail {
 namespace libvm {
 
-inline VmError allocThrow(const VmError e) {
+inline VmError allocThrow(VmError const e) {
     if (e == ::SHAREMIND_VM_OUT_OF_MEMORY)
         throw std::bad_alloc();
     return e;
@@ -120,7 +120,7 @@ template <typename CType> struct TypeInv;
     { using type = t; };
 
 #define SHAREMIND_LIBVM_CXX_DEFINE_TAGGETTER(type) \
-    inline type * getTag(const ::Sharemind ## type * const o) noexcept \
+    inline type * getTag(::Sharemind ## type const * const o) noexcept \
     { return static_cast<type *>(::Sharemind ## type ## _tag(o)); }
 
 #define SHAREMIND_LIBVM_CXX_DEFINE_TYPE_STUFF(type) \
@@ -151,11 +151,11 @@ inline typename TypeInv<CType>::type * optChild(CType * const ssc) noexcept
 
 template <typename T>
 using FindSyscallT =
-        decltype(std::declval<T &>()(std::declval<const char *>()));
+        decltype(std::declval<T &>()(std::declval<char const *>()));
 
 template <typename T>
 using FindPdT =
-        decltype(std::declval<T &>()(std::declval<const char *>()));
+        decltype(std::declval<T &>()(std::declval<char const *>()));
 
 template <typename T, typename = void>
 struct IsFindSyscall: std::false_type {};
@@ -224,11 +224,11 @@ private: /* Methods: */
 
     template <typename Inner>
     static SharemindSyscallWrapper staticFindSyscall(VmContext * c,
-                                                     const char * name) noexcept
+                                                     char const * name) noexcept
     { return static_cast<Inner *>(c->internal)->findSyscall(name); }
 
     template <typename Inner>
-    static SharemindPd * staticFindPd(VmContext * c, const char * name) noexcept
+    static SharemindPd * staticFindPd(VmContext * c, char const * name) noexcept
     { return static_cast<Inner *>(c->internal)->findPd(name); }
 
 };
@@ -312,18 +312,18 @@ class VmExceptionBase: public std::exception {
 
 public: /* Methods: */
 
-    inline VmExceptionBase(const VmError errorCode, const char * const errorStr)
+    inline VmExceptionBase(VmError const errorCode, char const * const errorStr)
         : m_errorCode((assert(errorCode != ::SHAREMIND_VM_OK), errorCode))
         , m_errorStr(errorStr ? errorStr : VmError_toString(errorCode))
     {}
 
     inline VmError code() const noexcept { return m_errorCode; }
-    inline const char * what() const noexcept override { return m_errorStr; }
+    inline char const * what() const noexcept override { return m_errorStr; }
 
 private: /* Fields: */
 
-    const VmError m_errorCode;
-    const char * const m_errorStr;
+    VmError const m_errorCode;
+    char const * const m_errorStr;
 
 }; /* class VmExceptionBase { */
 
@@ -342,7 +342,7 @@ public: /* Types: */
 
     public: /* Methods: */
 
-        inline RuntimeException(const ::SharemindProcess & process)
+        inline RuntimeException(::SharemindProcess const & process)
             : Exception(::SHAREMIND_VM_RUNTIME_EXCEPTION,
                         process)
             , m_code(::SharemindProcess_exception(&process))
@@ -361,9 +361,9 @@ public: /* Methods: */
 
     Process() = delete;
     Process(Process &&) = delete;
-    Process(const Process &) = delete;
+    Process(Process const &) = delete;
     Process & operator=(Process &&) = delete;
-    Process & operator=(const Process &) = delete;
+    Process & operator=(Process const &) = delete;
 
     inline Process(Program & program);
 
@@ -382,15 +382,15 @@ public: /* Methods: */
     size_t pdpiCount() const noexcept
     { return ::SharemindProcess_pdpiCount(m_c); }
 
-    ::SharemindPdpi * pdpi(const size_t pdpiIndex) const noexcept
+    ::SharemindPdpi * pdpi(size_t const pdpiIndex) const noexcept
     { return ::SharemindProcess_pdpi(m_c, pdpiIndex); }
 
-    void setPdpiFacility(const char * const name,
+    void setPdpiFacility(char const * const name,
                          void * const facility,
                          void * const context = nullptr)
             __attribute__((nonnull(2)))
     {
-        const VmError r = ::SharemindProcess_setPdpiFacility(m_c,
+        VmError const r = ::SharemindProcess_setPdpiFacility(m_c,
                                                              name,
                                                              facility,
                                                              context);
@@ -426,7 +426,7 @@ private: /* Methods: */
 
     template <VmError (* runFn)(::SharemindProcess *)>
     void run__() {
-        const VmError r = (*runFn)(m_c);
+        VmError const r = (*runFn)(m_c);
         if (r != ::SHAREMIND_VM_OK) {
             if (r == ::SHAREMIND_VM_RUNTIME_EXCEPTION)
                 throw RuntimeException(*m_c);
@@ -458,9 +458,9 @@ public: /* Methods: */
 
     Program() = delete;
     Program(Program &&) = delete;
-    Program(const Program &) = delete;
+    Program(Program const &) = delete;
     Program & operator=(Program &&) = delete;
-    Program & operator=(const Program &) = delete;
+    Program & operator=(Program const &) = delete;
 
     inline Program(Vm & vm)
         : Program(vm, static_cast<Overrides *>(nullptr))
@@ -495,35 +495,35 @@ public: /* Methods: */
     SHAREMIND_LIBVM_CXX_DEFINE_CPTR_GETTERS(Program)
     SHAREMIND_LIBVM_CXX_DEFINE_PARENT_GETTER(Program,Vm,vm)
 
-    void loadFromFile(const char * filename) {
+    void loadFromFile(char const * filename) {
         assert(filename);
-        const VmError r = ::SharemindProgram_loadFromFile(m_c, filename);
+        VmError const r = ::SharemindProgram_loadFromFile(m_c, filename);
         if (r != ::SHAREMIND_VM_OK)
             throw Exception(r, *m_c);
     }
 
     void loadFromCFile(FILE * file) {
         assert(file);
-        const VmError r = ::SharemindProgram_loadFromCFile(m_c, file);
+        VmError const r = ::SharemindProgram_loadFromCFile(m_c, file);
         if (r != ::SHAREMIND_VM_OK)
             throw Exception(r, *m_c);
     }
 
-    void loadFromFileDescriptor(const int fd) {
+    void loadFromFileDescriptor(int const fd) {
         assert(fd >= 0);
-        const VmError r = ::SharemindProgram_loadFromFileDescriptor(m_c, fd);
+        VmError const r = ::SharemindProgram_loadFromFileDescriptor(m_c, fd);
         if (r != ::SHAREMIND_VM_OK)
             throw Exception(r, *m_c);
     }
 
-    void loadFromMemory(const void * const data, const size_t size) {
+    void loadFromMemory(void const * const data, size_t const size) {
         assert(data);
-        const VmError r = ::SharemindProgram_loadFromMemory(m_c, data, size);
+        VmError const r = ::SharemindProgram_loadFromMemory(m_c, data, size);
         if (r != ::SHAREMIND_VM_OK)
             throw Exception(r, *m_c);
     }
 
-    void load(const char * const filename) { return loadFromFile(filename); }
+    void load(char const * const filename) { return loadFromFile(filename); }
     void load(FILE * const file) { return loadFromCFile(file); }
     void load(int const fd) { return loadFromFileDescriptor(fd); }
     void load(void const * const data, size_t const size)
@@ -531,11 +531,11 @@ public: /* Methods: */
 
     bool isReady() const noexcept { return ::SharemindProgram_isReady(m_c); }
 
-    const void * lastParsePosition() const noexcept
+    void const * lastParsePosition() const noexcept
     { return SharemindProgram_lastParsePosition(m_c); }
 
-    const VmInstruction * instruction(const size_t codeSection,
-                                      const size_t instructionIndex)
+    VmInstruction const * instruction(size_t const codeSection,
+                                      size_t const instructionIndex)
             const noexcept
     {
         return ::SharemindProgram_instruction(m_c,
@@ -584,9 +584,9 @@ public: /* Types: */
 public: /* Methods: */
 
     Vm(Vm &&) = delete;
-    Vm(const Vm &) = delete;
+    Vm(Vm const &) = delete;
     Vm & operator=(Vm &&) = delete;
-    Vm & operator=(const Vm &) = delete;
+    Vm & operator=(Vm const &) = delete;
 
     inline Vm() : Vm(static_cast<Context *>(nullptr)) {}
     inline Vm(Context & context) : Vm(&context) {}
@@ -620,7 +620,7 @@ private: /* Methods: */
     inline Vm(Context * const context)
         : m_c([context](){
             VmError error;
-            const char * errorStr;
+            char const * errorStr;
             ::SharemindVm * const vm =
                     ::SharemindVm_new(context, &error, &errorStr);
             if (vm)
