@@ -523,6 +523,12 @@ public: /* Methods: */
             throw Exception(r, *m_c);
     }
 
+    void load(const char * const filename) { return loadFromFile(filename); }
+    void load(FILE * const file) { return loadFromCFile(file); }
+    void load(int const fd) { return loadFromFileDescriptor(fd); }
+    void load(void const * const data, size_t const size)
+    { return loadFromMemory(data, size); }
+
     bool isReady() const noexcept { return ::SharemindProgram_isReady(m_c); }
 
     const void * lastParsePosition() const noexcept
