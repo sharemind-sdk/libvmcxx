@@ -26,7 +26,7 @@
 #include <sharemind/compiler-support/GccPR54526.h>
 #include <sharemind/compiler-support/GccPR55015.h>
 #include <sharemind/FunctionTraits.h>
-#include <sharemind/VoidT.h>
+#include <sharemind/Void.h>
 #include <type_traits>
 #include <utility>
 #include "libvm.h"
@@ -161,7 +161,7 @@ template <typename T, typename = void>
 struct IsFindSyscall: std::false_type {};
 
 template <typename T>
-struct IsFindSyscall<T, VoidT<FindSyscallT<T> > >
+struct IsFindSyscall<T, Void_t<FindSyscallT<T> > >
         : std::is_same<typename FunctionTraits<
                            decltype(std::declval<VmContext *>()
                                         ->find_syscall)>::return_type,
@@ -172,7 +172,7 @@ template <typename T, typename = void>
 struct IsFindPd: std::false_type {};
 
 template <typename T>
-struct IsFindPd<T, VoidT<FindSyscallT<T> > >
+struct IsFindPd<T, Void_t<FindSyscallT<T> > >
         : std::is_same<typename FunctionTraits<
                            decltype(std::declval<VmContext *>()
                                         ->find_pd)>::return_type,
