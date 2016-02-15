@@ -401,9 +401,9 @@ public: /* Methods: */
     void setInternal(void * const value) noexcept
     { ::SharemindProcess_setInternal(m_c, value); }
 
-    void run() { run__<&::SharemindProcess_run>(); }
+    void run() { run_<&::SharemindProcess_run>(); }
 
-    void continueRun() { run__<&::SharemindProcess_continue>(); }
+    void continueRun() { run_<&::SharemindProcess_continue>(); }
 
     void pause() { ::SharemindProcess_pause(m_c); }
 
@@ -425,7 +425,7 @@ public: /* Methods: */
 private: /* Methods: */
 
     template <VmError (* runFn)(::SharemindProcess *)>
-    void run__() {
+    void run_() {
         VmError const r = (*runFn)(m_c);
         if (r != ::SHAREMIND_VM_OK) {
             if (r == ::SHAREMIND_VM_RUNTIME_EXCEPTION)
