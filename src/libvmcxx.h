@@ -455,7 +455,6 @@ class Program {
 
 public: /* Types: */
 
-    using Overrides = VmContext;
     SHAREMIND_LIBVM_CXX_DEFINE_EXCEPTION(Program);
 
 public: /* Methods: */
@@ -466,27 +465,7 @@ public: /* Methods: */
     Program & operator=(Program &&) = delete;
     Program & operator=(Program const &) = delete;
 
-    inline Program(Vm & vm)
-        : Program(vm, static_cast<Overrides *>(nullptr))
-    {}
-
-    inline Program(Vm & vm, Overrides & overrides) : Program(vm, &overrides) {}
-
-    template <typename F>
-    inline Program(Vm & vm, F && f)
-        : Program(vm,
-                  static_cast<Overrides *>(
-                      new Detail::libvm::CustomContext1<F>{std::forward<F>(f)}))
-    {}
-
-    template <typename FindSyscall, typename FindPd>
-    inline Program(Vm & vm, FindSyscall && findSyscall, FindPd && findPd)
-        : Program(vm,
-                  static_cast<Overrides *>(
-                      new Detail::libvm::CustomContext2<FindSyscall, FindPd>{
-                            std::forward<FindSyscall>(findSyscall),
-                            std::forward<FindPd>(findPd)}))
-    {}
+    inline Program(Vm & vm);
 
     virtual inline ~Program() noexcept {
         if (m_c) {
@@ -554,8 +533,6 @@ public: /* Methods: */
     { return ::SharemindProgram_pd(m_c, pdIndex); }
 
 private: /* Methods: */
-
-    inline Program(Vm & vm, Overrides * const overrides);
 
     inline ::SharemindProcess & newProcess() {
         ::SharemindProcess * const p = ::SharemindProgram_newProcess(m_c);
@@ -639,10 +616,8 @@ private: /* Methods: */
         #undef SHAREMIND_LIBVM_CXX_VM_L1
     }
 
-    inline ::SharemindProgram & newProgram(Program::Overrides * const overrides) {
-        ::SharemindProgram * const p =
-                ::SharemindVm_newProgram(m_c, overrides);
-        if (p)
+    inline ::SharemindProgram & newProgram() {
+        if (::SharemindProgram * const p = ::SharemindVm_newProgram(m_c))
             return *p;
         throw Exception(*m_c);
     }
@@ -658,8 +633,8 @@ private: /* Fields: */
   Program methods
 *******************************************************************************/
 
-inline Program::Program(Vm & vm, Overrides * const overrides)
-    : m_c(&vm.newProgram(overrides))
+inline Program::Program(Vm & vm)
+    : m_c(&vm.newProgram())
 {
     try {
         #define SHAREMIND_LIBVM_CXX_PROGRAM_L1 \
