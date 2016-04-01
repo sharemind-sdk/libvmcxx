@@ -401,6 +401,10 @@ public: /* Methods: */
     void setInternal(void * const value) noexcept
     { ::SharemindProcess_setInternal(m_c, value); }
 
+    void setProcessFacility(char const * const name,
+                            void * const value) noexcept
+    { ::SharemindProcess_setProcessFacility(m_c, name, value); }
+
     void run() { run_<&::SharemindProcess_run>(); }
 
     void continueRun() { run_<&::SharemindProcess_continue>(); }
