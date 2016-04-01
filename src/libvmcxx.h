@@ -401,9 +401,9 @@ public: /* Methods: */
     void setInternal(void * const value) noexcept
     { ::SharemindProcess_setInternal(m_c, value); }
 
-    void setProcessFacility(char const * const name,
-                            void * const value) noexcept
-    { ::SharemindProcess_setProcessFacility(m_c, name, value); }
+    void setFacility(char const * const name,
+                     void * const value) noexcept
+    { ::SharemindProcess_setFacility(m_c, name, value); }
 
     void run() { run_<&::SharemindProcess_run>(); }
 
@@ -594,20 +594,6 @@ public: /* Methods: */
 
     inline Vm() : Vm(static_cast<Context *>(nullptr)) {}
     inline Vm(Context & context) : Vm(&context) {}
-
-    template <typename F>
-    inline Vm(F && f)
-        : Vm(static_cast<Context *>(
-                 new Detail::libvm::CustomContext1<F>{std::forward<F>(f)}))
-    {}
-
-    template <typename FindSyscall, typename FindPd>
-    inline Vm(FindSyscall && findSyscall, FindPd && findPd)
-        : Vm(static_cast<Context *>(
-                 new Detail::libvm::CustomContext2<FindSyscall, FindPd>{
-                            std::forward<FindSyscall>(findSyscall),
-                            std::forward<FindPd>(findPd)}))
-    {}
 
     virtual inline ~Vm() noexcept {
         if (m_c) {
