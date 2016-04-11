@@ -25,7 +25,7 @@
 #include <new>
 #include <sharemind/compiler-support/GccPR54526.h>
 #include <sharemind/compiler-support/GccPR55015.h>
-#include <sharemind/libvm.h>
+#include <sharemind/libvm/libvm.h>
 #include <sharemind/FunctionTraits.h>
 #include <sharemind/Void.h>
 #include <type_traits>
