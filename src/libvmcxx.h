@@ -250,7 +250,7 @@ public: /* Methods: */
     void setInternal(void * const value) noexcept
     { ::SharemindProcess_setInternal(m_c, value); }
 
-    void setFacility(char const * const name, void * const value) noexcept {
+    void setFacility(char const * const name, void * const value) {
         VmError const r = ::SharemindProcess_setFacility(m_c, name, value);
         if (r != ::SHAREMIND_VM_OK)
             throw Exception(r, *m_c);
