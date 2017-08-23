@@ -31,15 +31,15 @@ INCLUDE("${CMAKE_CURRENT_SOURCE_DIR}/config.local" OPTIONAL)
 INCLUDE("${CMAKE_CURRENT_BINARY_DIR}/config.local" OPTIONAL)
 
 FIND_PACKAGE(SharemindCxxHeaders REQUIRED)
-FIND_PACKAGE(SharemindLibvm 0.5.0 REQUIRED)
+FIND_PACKAGE(SharemindLibVm 0.5.0 REQUIRED)
 
 SET(LIBVMCXX_INSTALL_DEFINITIONS ${SharemindCxxHeaders_DEFINITIONS}
-                                 ${SharemindLibvm_DEFINITIONS})
+                                 ${SharemindLibVm_DEFINITIONS})
 SET(LIBVMCXX_INSTALL_LINK_LIBRARIES ${SharemindCxxHeaders_LIBRARIES}
-                                    ${SharemindLibvm_LIBRARIES})
+                                    ${SharemindLibVm_LIBRARIES})
 SET(LIBVMCXX_INSTALL_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include"
                                   ${SharemindCxxHeaders_INCLUDE_DIRS}
-                                  ${SharemindLibvm_INCLUDE_DIRS})
+                                  ${SharemindLibVm_INCLUDE_DIRS})
 
 FILE(GLOB_RECURSE SHAREMIND_LIBVMCXX_HEADERS
      "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h")
