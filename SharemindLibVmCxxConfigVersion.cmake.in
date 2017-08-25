@@ -17,12 +17,19 @@
 # For further information, please contact us at sharemind@cyber.ee.
 #
 
-# This file defines the following variables:
-#   SharemindLibvmCxx_INCLUDE_DIRS - include directories
-#   SharemindLibvmCxx_LIBRARIES    - libraries to link against
-#   SharemindLibvmCxx_DEFINITIONS  - required compiler definitions
+SET(PACKAGE_VERSION "@SharemindLibVmCxx_VERSION@")
+IF(NOT SharemindLibVmCxx_QUIET)
+    MESSAGE(STATUS "Sharemind libvm(C++) version: ${PACKAGE_VERSION}")
+ENDIF()
 
-
-SET(SharemindLibvmCxx_INCLUDE_DIRS @LIBVMCXX_INSTALL_INCLUDE_DIRS@)
-SET(SharemindLibvmCxx_LIBRARIES @LIBVMCXX_INSTALL_LINK_LIBRARIES@)
-SET(SharemindLibvmCxx_DEFINITIONS @LIBVMCXX_INSTALL_DEFINITIONS@)
+IF("${PACKAGE_VERSION}" VERSION_EQUAL "${PACKAGE_FIND_VERSION}")
+  SET(PACKAGE_VERSION_EXACT TRUE)
+ELSE()
+  SET(PACKAGE_VERSION_EXACT FALSE)
+ENDIF()
+IF(("${PACKAGE_VERSION}" VERSION_LESS "${PACKAGE_FIND_VERSION}")
+   OR ("${PACKAGE_FIND_VERSION}" VERSION_LESS "@SharemindLibVmCxx_COMPAT_VERSION@"))
+  SET(PACKAGE_VERSION_COMPATIBLE FALSE)
+ELSE()
+  SET(PACKAGE_VERSION_COMPATIBLE TRUE)
+ENDIF()
