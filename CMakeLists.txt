@@ -37,7 +37,8 @@ FILE(GLOB_RECURSE SharemindLibVmCxx_HEADERS
 ADD_CUSTOM_TARGET("include_libvmcxx_headers_in_IDE"
                   SOURCES ${SharemindLibVmCxx_HEADERS})
 INSTALL(FILES ${SharemindLibVmCxx_HEADERS}
-        DESTINATION "include/sharemind/libvm")
+        DESTINATION "include/sharemind/libvm"
+        COMPONENT "dev")
 
 # Install cmake files:
 SET(SharemindLibVmCxx_INSTALL_DEFINITIONS ${SharemindCxxHeaders_DEFINITIONS}
