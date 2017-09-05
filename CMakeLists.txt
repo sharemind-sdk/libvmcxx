@@ -26,7 +26,7 @@ INCLUDE("${CMAKE_CURRENT_BINARY_DIR}/config.local" OPTIONAL)
 FIND_PACKAGE(SharemindCMakeHelpers REQUIRED)
 
 SharemindSetProjectVersion()
-SET(SharemindLibVmCxx_COMPAT_VERSION "${SharemindLibVmCxx_VERSION}")
+
 
 FIND_PACKAGE(SharemindCxxHeaders REQUIRED)
 FIND_PACKAGE(SharemindLibVm 0.5.0 REQUIRED)
@@ -41,14 +41,18 @@ INSTALL(FILES ${SharemindLibVmCxx_HEADERS}
         COMPONENT "dev")
 
 # Install cmake files:
-SET(SharemindLibVmCxx_INSTALL_DEFINITIONS ${SharemindCxxHeaders_DEFINITIONS}
-                                          ${SharemindLibVm_DEFINITIONS})
-SET(SharemindLibVmCxx_INSTALL_LINK_LIBRARIES ${SharemindCxxHeaders_LIBRARIES}
-                                             ${SharemindLibVm_LIBRARIES})
-SET(SharemindLibVmCxx_INSTALL_INCLUDE_DIRS "${CMAKE_INSTALL_PREFIX}/include"
-                                           ${SharemindCxxHeaders_INCLUDE_DIRS}
-                                           ${SharemindLibVm_INCLUDE_DIRS})
-SharemindUseCMakeFindFiles()
+SharemindCreateCMakeFindFiles(
+    INCLUDE_DIRS
+        "${CMAKE_INSTALL_PREFIX}/include"
+        ${SharemindCxxHeaders_INCLUDE_DIRS}
+        ${SharemindLibVm_INCLUDE_DIRS}
+    DEFINITIONS
+        ${SharemindCxxHeaders_DEFINITIONS}
+        ${SharemindLibVm_DEFINITIONS}
+    LIBRARIES
+        ${SharemindCxxHeaders_LIBRARIES}
+        ${SharemindLibVm_LIBRARIES}
+)
 
 
 # Packaging:
